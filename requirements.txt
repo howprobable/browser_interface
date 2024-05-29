@@ -1,0 +1,4 @@
+git+https://github.com/howprobable/py_helpers
+
+pyautogui
+pychrome

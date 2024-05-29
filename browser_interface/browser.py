@@ -265,9 +265,12 @@ class browserIF:
     def get_url(self) -> str:
         return self._get_url_of_tab(tab=self.tab)
     
-    def get_scroll_px(self) -> str: 
-        return self._exec(cmd="window.scrollY", tab=self.tab)
-    
+    def get_scroll_px(self, x_axis: bool = False) -> str: 
+        return self._exec(cmd=f"window.{'scrollY' if not x_axis else 'scrollX'}", tab=self.tab)
+
+    def get_scroll(self) -> Point: 
+        return Point(self.get_scroll_px(x_axis=True), self.get_scroll_px())
+
     def manual_mode(self) -> None: 
         print("Tabs: ", self.get_tabs())
         inp = input("Which tab shall I controll (None for [0]): ")

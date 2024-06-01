@@ -1,26 +1,3 @@
-"""
-This module provides a browser interface for automating tasks in Google Chrome.
-It includes functionality for starting Chrome, opening tabs, interacting with UI elements,
-and retrieving information about the viewport and window.
-
-Classes:
-- uiElement: Represents a UI element on a web page.
-- TabNotFound: Exception raised when a tab is not found.
-- WindowNotFound: Exception raised when a window is not found.
-- ClickableBufferEmpty: Exception raised when the clickable buffer is empty.
-- TypeableBufferEmpty: Exception raised when the typeable buffer is empty.
-- ClickableNotFound: Exception raised when a clickable element is not found.
-- TypeableNotFound: Exception raised when a typeable element is not found.
-- FailedJSQuery: Exception raised when a JavaScript query fails.
-- TooManyGoogleChromes: Exception raised when there are too many instances of Google Chrome.
-- TooLessGoogleChromes: Exception raised when there are too few instances of Google Chrome.
-- browserIF: Represents the browser interface.
-
-Functions:
-- start_chrome_if_not_running: Starts Google Chrome if it is not already running.
-
-"""
-
 from __future__ import annotations
 
 from typing import Any, Union
@@ -53,19 +30,6 @@ def start_chrome_if_not_running(verbose: bool = False):
 
 @dataclass
 class uiElement:
-    """
-    Represents a user interface element.
-
-    Attributes:
-        id (str): The ID of the element.
-        id_nr (int): The numerical ID of the element.
-        text (str): The text content of the element.
-        type (str): The type of the element.
-        pos (Rectangle): The position and size of the element.
-        clickable (bool): Indicates if the element is clickable. Default is False.
-        typeable (bool): Indicates if the element is typeable. Default is False.
-    """
-
     def __str__(self): 
         t = self.text.replace("\n", "\\n")
         if self.typeable: 
@@ -177,13 +141,13 @@ class browserIF:
 
         if not url:
             self.tab = tabs[nr]
-            if self.verbose: print(f"[Browser] Hijacked tab: {self.tab}")
+            if self.verbose: print(f"[Browser] Hijacked tab by NR: {self.tab}")
             return
 
         for tab in tabs:
             if url.lower() in self._get_url_of_tab(tab=tab):
                 self.tab = tab
-                if self.verbose: print(f"[Browser] Hijacked tab: {self.tab}")
+                if self.verbose: print(f"[Browser] Hijacked tab by URL: {self.tab}")
                 return
 
         raise TabNotFound()
@@ -406,7 +370,8 @@ class browserIF:
         return self._exec(cmd="document.location.href", tab=tab)
 
     def _exec(self, cmd: str, tab: Tab = None, noReturn: bool = False) -> Any:
-        if self.verbose: print(f"[Browser] self.tab: {self.tab}, tab: {tab}")
+        print(f"[Browser] self.tab: {self.tab}, tab: {tab}")
+
         if not tab: tab = self.tab
 
         if tab.status != tab.status_started: 

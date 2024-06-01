@@ -109,7 +109,11 @@ class browserIF:
     def __init__(
         self,
         debugging_url: str = "http://localhost:9222",
+        start_and_close: bool = True,
     ):
+        if start_and_close: start_chrome_if_not_running()
+        self.start_and_close : bool = start_and_close
+        
         self.browser = pychrome.Browser(url=debugging_url)
         self.tab: Tab = None
         self.clickable_buffer : list[uiElement] = None
@@ -118,9 +122,12 @@ class browserIF:
         self.typeable_query_file = os.path.join(os.path.dirname(__file__), 'js', 'typeable_elements.js')
         self.clickable_query_file = os.path.join(os.path.dirname(__file__), 'js', 'clickable_elements.js')
         self.text_query_file = os.path.join(os.path.dirname(__file__), 'js', 'text_elements.js')
+        self.clean = False
 
     def __del__(self):
-        pass
+        if not self.clean:
+            if self.start_and_close: self.close_browser()
+            self.clean = True
 
     ### Public
     def hijack_tab(self, url: str = None, nr: int = 0) -> None:
@@ -148,6 +155,16 @@ class browserIF:
         self.tab.wait(timeout=browserIF.tab_waiter)
         self.tab.Page.navigate(url=url)
         self.tab.wait(timeout=browserIF.tab_waiter)
+
+    def close_browser(self) -> None:
+        chrome_windows = pyautogui.getWindowsWithTitle("- Google Chrome")
+        if len(chrome_windows) == 0: raise TooLessGoogleChromes() 
+        if len(chrome_windows) > 1: raise TooManyGoogleChromes() 
+
+        browser_window = pyautogui.getWindowsWithTitle("- Google Chrome")[0] 
+        browser_window.close()
+
+        self.clean = True
 
     def close_tab(self) -> None:
         if not self.tab:

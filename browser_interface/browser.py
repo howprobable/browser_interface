@@ -143,7 +143,7 @@ class browserIF:
     ):
         self.clean: bool = False
         self.verbose: bool = verbose
-        
+
         if start_and_close: 
             start_chrome_if_not_running()
 
@@ -177,13 +177,13 @@ class browserIF:
 
         if not url:
             self.tab = tabs[nr]
-            if self.verbose: print(f"Hijacked tab: {self.tab}")
+            if self.verbose: print(f"[Browser] Hijacked tab: {self.tab}")
             return
 
         for tab in tabs:
             if url.lower() in self._get_url_of_tab(tab=tab):
                 self.tab = tab
-                if self.verbose: print(f"Hijacked tab: {self.tab}")
+                if self.verbose: print(f"[Browser] Hijacked tab: {self.tab}")
                 return
 
         raise TabNotFound()
@@ -406,6 +406,7 @@ class browserIF:
         return self._exec(cmd="document.location.href", tab=tab)
 
     def _exec(self, cmd: str, tab: Tab = None, noReturn: bool = False) -> Any:
+        if self.verbose: print(f"[Browser] self.tab: {self.tab}, tab: {tab}")
         if not tab: tab = self.tab
 
         if tab.status != tab.status_started: 

@@ -1,3 +1,26 @@
+"""
+This module provides a browser interface for automating tasks in Google Chrome.
+It includes functionality for starting Chrome, opening tabs, interacting with UI elements,
+and retrieving information about the viewport and window.
+
+Classes:
+- uiElement: Represents a UI element on a web page.
+- TabNotFound: Exception raised when a tab is not found.
+- WindowNotFound: Exception raised when a window is not found.
+- ClickableBufferEmpty: Exception raised when the clickable buffer is empty.
+- TypeableBufferEmpty: Exception raised when the typeable buffer is empty.
+- ClickableNotFound: Exception raised when a clickable element is not found.
+- TypeableNotFound: Exception raised when a typeable element is not found.
+- FailedJSQuery: Exception raised when a JavaScript query fails.
+- TooManyGoogleChromes: Exception raised when there are too many instances of Google Chrome.
+- TooLessGoogleChromes: Exception raised when there are too few instances of Google Chrome.
+- browserIF: Represents the browser interface.
+
+Functions:
+- start_chrome_if_not_running: Starts Google Chrome if it is not already running.
+
+"""
+
 from __future__ import annotations
 
 from typing import Any, Union
@@ -30,13 +53,18 @@ def start_chrome_if_not_running(verbose: bool = False):
 
 @dataclass
 class uiElement:
-    id: str 
-    id_nr: int 
-    text: str
-    type: str
-    pos: Rectangle
-    clickable: bool = False
-    typeable: bool = False
+    """
+    Represents a user interface element.
+
+    Attributes:
+        id (str): The ID of the element.
+        id_nr (int): The numerical ID of the element.
+        text (str): The text content of the element.
+        type (str): The type of the element.
+        pos (Rectangle): The position and size of the element.
+        clickable (bool): Indicates if the element is clickable. Default is False.
+        typeable (bool): Indicates if the element is typeable. Default is False.
+    """
 
     def __str__(self): 
         t = self.text.replace("\n", "\\n")
@@ -102,6 +130,7 @@ class TooManyGoogleChromes(Exception): pass
 class TooLessGoogleChromes(Exception): pass
 
 class browserIF:
+    
     ### Configs
     tab_waiter = 1
 
@@ -114,12 +143,13 @@ class browserIF:
     ):
         if start_and_close: 
             start_chrome_if_not_running()
-            self.hijack_tab()
 
         self.start_and_close : bool = start_and_close
-
-        
         self.browser = pychrome.Browser(url=debugging_url)
+
+        if start_and_close: 
+            self.hijack_tab()
+
         self.tab: Tab = None
         self.clickable_buffer : list[uiElement] = None
         self.typeable_buffer : list[uiElement] = None

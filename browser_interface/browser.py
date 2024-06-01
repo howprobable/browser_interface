@@ -170,6 +170,13 @@ class browserIF:
 
         return ret
 
+    def set_window(self, window: Rectangle) -> None:
+        chrome_windows = pyautogui.getWindowsWithTitle("- Google Chrome")
+        if len(chrome_windows) == 0: raise TooLessGoogleChromes() 
+        if len(chrome_windows) > 1: raise TooManyGoogleChromes() 
+        
+        pyautogui.getWindowsWithTitle("- Google Chrome")[0].resizeTo(window.width, window.height)
+        pyautogui.getWindowsWithTitle("- Google Chrome")[0].moveTo(window.top_left.x, window.top_left.y)
 
     def get_window(self) -> Rectangle:
         chrome_windows = pyautogui.getWindowsWithTitle("- Google Chrome")

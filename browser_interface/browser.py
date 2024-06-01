@@ -113,11 +113,11 @@ class browserIF:
 
         self.start_and_close : bool = start_and_close
         self.browser = pychrome.Browser(url=debugging_url)
-
+        self.tab: Tab = None
+        
         if start_and_close: 
             self.hijack_tab()
 
-        self.tab: Tab = None
         self.clickable_buffer : list[uiElement] = None
         self.typeable_buffer : list[uiElement] = None
 
@@ -372,7 +372,10 @@ class browserIF:
     def _exec(self, cmd: str, tab: Tab = None, noReturn: bool = False) -> Any:
         print(f"[Browser] self.tab: {self.tab}, tab: {tab}")
 
-        if not tab: tab = self.tab
+        if not tab:
+            if not self.tab:
+                raise TabNotFound() 
+            tab = self.tab
 
         if tab.status != tab.status_started: 
             tab.start()

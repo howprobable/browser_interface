@@ -110,11 +110,12 @@ class browserIF:
         self,
         debugging_url: str = "http://localhost:9222",
         start_and_close: bool = True,
+        verbose: bool = False,
     ):
         if start_and_close: 
             start_chrome_if_not_running()
             self.hijack_tab()
-            
+
         self.start_and_close : bool = start_and_close
 
         
@@ -123,10 +124,12 @@ class browserIF:
         self.clickable_buffer : list[uiElement] = None
         self.typeable_buffer : list[uiElement] = None
 
-        self.typeable_query_file = os.path.join(os.path.dirname(__file__), 'js', 'typeable_elements.js')
-        self.clickable_query_file = os.path.join(os.path.dirname(__file__), 'js', 'clickable_elements.js')
-        self.text_query_file = os.path.join(os.path.dirname(__file__), 'js', 'text_elements.js')
-        self.clean = False
+        self.typeable_query_file: str = os.path.join(os.path.dirname(__file__), 'js', 'typeable_elements.js')
+        self.clickable_query_file: str = os.path.join(os.path.dirname(__file__), 'js', 'clickable_elements.js')
+        self.text_query_file: str = os.path.join(os.path.dirname(__file__), 'js', 'text_elements.js')
+        self.clean: bool = False
+        self.verbose: bool = verbose
+        
 
     def __del__(self):
         if not self.clean: 
@@ -143,11 +146,13 @@ class browserIF:
 
         if not url:
             self.tab = tabs[nr]
+            if self.verbose: print(f"Hijacked tab: {self.tab}")
             return
 
         for tab in tabs:
             if url.lower() in self._get_url_of_tab(tab=tab):
                 self.tab = tab
+                if self.verbose: print(f"Hijacked tab: {self.tab}")
                 return
 
         raise TabNotFound()

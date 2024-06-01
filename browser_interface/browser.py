@@ -125,11 +125,15 @@ class browserIF:
         self.clean = False
 
     def __del__(self):
+        if not self.clean: 
+            self.clean_up()
+
+    ### Public
+    def clean_up(self): 
         if not self.clean:
             if self.start_and_close: self.close_browser()
             self.clean = True
 
-    ### Public
     def hijack_tab(self, url: str = None, nr: int = 0) -> None:
         tabs = self.browser.list_tab()
 

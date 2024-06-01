@@ -141,6 +141,9 @@ class browserIF:
         start_and_close: bool = True,
         verbose: bool = False,
     ):
+        self.clean: bool = False
+        self.verbose: bool = verbose
+        
         if start_and_close: 
             start_chrome_if_not_running()
 
@@ -157,8 +160,6 @@ class browserIF:
         self.typeable_query_file: str = os.path.join(os.path.dirname(__file__), 'js', 'typeable_elements.js')
         self.clickable_query_file: str = os.path.join(os.path.dirname(__file__), 'js', 'clickable_elements.js')
         self.text_query_file: str = os.path.join(os.path.dirname(__file__), 'js', 'text_elements.js')
-        self.clean: bool = False
-        self.verbose: bool = verbose
         
 
     def __del__(self):

@@ -111,8 +111,12 @@ class browserIF:
         debugging_url: str = "http://localhost:9222",
         start_and_close: bool = True,
     ):
-        if start_and_close: start_chrome_if_not_running()
+        if start_and_close: 
+            start_chrome_if_not_running()
+            self.hijack_tab()
+            
         self.start_and_close : bool = start_and_close
+
         
         self.browser = pychrome.Browser(url=debugging_url)
         self.tab: Tab = None

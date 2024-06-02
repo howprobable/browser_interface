@@ -186,11 +186,18 @@ class browserIF:
         self.clean = True
 
     def close_tab(self) -> None:
-        if self.verbose: print("[Browser] Closing tab....")
+        if self.verbose: print(f"[Browser] Closing tab.... {self.tab}")
+
         if not self.tab:
+            if self.verbose: print("[Browser] Tab already closed")
             return
+        
         self.tab.stop() 
+        
+        if self.verbose: print(f"[Browser] Tab stopped.... {self.tab}, closing tab....")
         self.browser.close_tab(self.tab)
+        if self.verbose: print(f"[Browser] Browser closed.... {self.tab}")
+        self.tab = None
 
     def get_viewport_content(self, withMetaInfo: bool = True) -> str: 
         elem_list : list[uiElement] = self._combine_all_elements(clickables=self._get_clickables(), texts=self._get_text_elements(), typeables=self._get_typeables())

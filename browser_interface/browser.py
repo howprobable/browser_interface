@@ -109,6 +109,7 @@ class browserIF:
         self.verbose: bool = verbose
 
         if start_and_close: 
+            if verbose: print("[Browser] Starting Chrome....")
             start_chrome_if_not_running()
 
         self.start_and_close : bool = start_and_close
@@ -127,15 +128,18 @@ class browserIF:
         
 
     def __del__(self):
+        if self.verbose: print(f"[Browser] Destructor called....(clean: {self.clean})")
         if not self.clean: 
             self.clean_up()
 
     ### Public
     def clean_up(self): 
-        if self.verbose: print("[Browser] Cleaning up....")
+        if self.verbose: print(f"[Browser] Cleaning up...")
         if not self.clean:
             if self.start_and_close: self.close_browser()
             self.clean = True
+        else: 
+            if self.verbose: print("[Browser] Already cleaned up....")
 
     def hijack_tab(self, url: str = None, nr: int = 0) -> None:
         tabs = self.browser.list_tab()

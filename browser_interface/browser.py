@@ -132,6 +132,7 @@ class browserIF:
 
     ### Public
     def clean_up(self): 
+        if self.verbose: print("[Browser] Cleaning up....")
         if not self.clean:
             if self.start_and_close: self.close_browser()
             self.clean = True
@@ -157,6 +158,7 @@ class browserIF:
         return [self._get_url_of_tab(tab=t) for t in tabs]
 
     def open_tab(self, url: str) -> None:
+        if self.verbose: print(f"[Browser] Opening tab: {url}")
         if not (url.startswith("https://") or url.startswith("http://")): url = f"https://{url}" 
         self.tab = self.browser.new_tab()
         self.tab.start() 
@@ -165,16 +167,22 @@ class browserIF:
         self.tab.wait(timeout=browserIF.tab_waiter)
 
     def close_browser(self) -> None:
+        if self.verbose: print("[Browser] Closing Chrome....")
         chrome_windows = pyautogui.getWindowsWithTitle("- Google Chrome")
-        if len(chrome_windows) == 0: raise TooLessGoogleChromes() 
+        if len(chrome_windows) == 0: 
+            if self.verbose: print("[Browser] Chrome already closed")
+            return 
+        
         if len(chrome_windows) > 1: raise TooManyGoogleChromes() 
 
+        self.close_tab()
         browser_window = pyautogui.getWindowsWithTitle("- Google Chrome")[0] 
         browser_window.close()
 
         self.clean = True
 
     def close_tab(self) -> None:
+        if self.verbose: print("[Browser] Closing tab....")
         if not self.tab:
             return
         self.tab.stop() 

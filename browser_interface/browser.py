@@ -19,9 +19,9 @@ import logging
 logging.getLogger('pychrome').setLevel(logging.CRITICAL)
 
 
-def start_chrome_if_not_running(verbose: bool = False): 
+def start_chrome_if_not_running(verbose: bool = False, path: str = None): 
     chrome_running = any("chrome.exe" in p.name() for p in psutil.process_iter())
-    chrome_path = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    chrome_path = path or "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
     params = ["--remote-debugging-port=9222", "--user-data-dir=C:\\tmp2", "--remote-allow-origins=*"]
     
     if not chrome_running: 
@@ -146,6 +146,7 @@ class browserIF:
 
     def hijack_tab(self, url: str = None, nr: int = 0) -> None:
         tabs = self.browser.list_tab()
+        if len(tabs): raise TabNotFound() 
 
         if not url:
             self.tab = tabs[nr]
@@ -202,12 +203,13 @@ class browserIF:
         try: 
             self.tab.wait(timeout=browserIF.tab_waiter)
         except RuntimeException as _: 
-            if self.verbose: print(f"[Browser] RuntimeException: Tab already closed....")
+            if self.verbose: print(f"[Browser] RuntimeException: Tab already stopped....")
 
         if self.verbose: print(f"[Browser] Tab stopped.... {self.tab}, closing tab....")
         self.browser.close_tab(self.tab)
-        if self.verbose: print(f"[Browser] Browser closed tab.... {self.tab}")
-        self.tab = None
+        if self.verbose: print(f"[Browser] Browser closed tab.... {self.tab}, hijacking other tab....")
+        
+        self.hijack_tab()
 
     def get_viewport_content(self, withMetaInfo: bool = True) -> str: 
         elem_list : list[uiElement] = self._combine_all_elements(clickables=self._get_clickables(), texts=self._get_text_elements(), typeables=self._get_typeables())

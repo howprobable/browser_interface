@@ -180,6 +180,7 @@ class browserIF:
         if len(chrome_windows) > 1: raise TooManyGoogleChromes() 
 
         self.close_tab()
+
         browser_window = pyautogui.getWindowsWithTitle("- Google Chrome")[0] 
         browser_window.close()
 
@@ -194,9 +195,14 @@ class browserIF:
         
         self.tab.stop() 
         
+        try: 
+            self.tab.wait(timeout=browserIF.tab_waiter)
+        except RuntimeException as _: 
+            if self.verbose: print(f"[Browser] RuntimeException: Tab already closed....")
+
         if self.verbose: print(f"[Browser] Tab stopped.... {self.tab}, closing tab....")
         self.browser.close_tab(self.tab)
-        if self.verbose: print(f"[Browser] Browser closed.... {self.tab}")
+        if self.verbose: print(f"[Browser] Browser closed tab.... {self.tab}")
         self.tab = None
 
     def get_viewport_content(self, withMetaInfo: bool = True) -> str: 

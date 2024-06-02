@@ -146,7 +146,7 @@ class browserIF:
 
     def hijack_tab(self, url: str = None, nr: int = 0) -> None:
         tabs = self.browser.list_tab()
-        if len(tabs): raise TabNotFound() 
+        if len(tabs) == 0: raise TabNotFound() 
 
         if not url:
             self.tab = tabs[nr]

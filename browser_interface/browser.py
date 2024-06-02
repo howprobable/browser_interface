@@ -180,7 +180,8 @@ class browserIF:
         if len(chrome_windows) > 1: raise TooManyGoogleChromes() 
 
         self.close_tab()
-
+        time.sleep(.5) 
+        
         browser_window = pyautogui.getWindowsWithTitle("- Google Chrome")[0] 
         browser_window.close()
 
@@ -194,7 +195,7 @@ class browserIF:
             return
         
         self.tab.stop() 
-        
+
         try: 
             self.tab.wait(timeout=browserIF.tab_waiter)
         except RuntimeException as _: 

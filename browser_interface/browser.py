@@ -15,6 +15,9 @@ import json
 import pychrome
 
 
+import logging
+logging.getLogger('pychrome').setLevel(logging.CRITICAL)
+
 
 def start_chrome_if_not_running(verbose: bool = False): 
     chrome_running = any("chrome.exe" in p.name() for p in psutil.process_iter())
@@ -181,7 +184,7 @@ class browserIF:
 
         self.close_tab()
         time.sleep(.5) 
-        
+
         browser_window = pyautogui.getWindowsWithTitle("- Google Chrome")[0] 
         browser_window.close()
 

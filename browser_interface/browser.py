@@ -11,24 +11,31 @@ import time
 import pyautogui
 import subprocess
 import psutil
+import shutil
 import json
 import pychrome
+import uuid
 
 
 import logging
 logging.getLogger('pychrome').setLevel(logging.CRITICAL)
 
+class LangNotFound(Exception): pass
 
-def start_chrome_if_not_running(verbose: bool = False, path: str = None): 
+def start_chrome_if_not_running(verbose: bool = False, path: str = None, lang: str = "de"):
+    if lang not in ["de", "en_US"]: raise LangNotFound(lang)
+
     chrome_running = any("chrome.exe" in p.name() for p in psutil.process_iter())
     chrome_path = path or "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-    params = ["--remote-debugging-port=9222", "--user-data-dir=C:\\tmp2", "--remote-allow-origins=*"]
+    uid = str(uuid.uuid4())
+    shutil.copytree("C:\\auto_chrome\\tmp_"+lang, "C:\\auto_chrome\\tmp_"+uid)
+    params = ["--remote-debugging-port=9222", "--user-data-dir=C:\\auto_chrome\\tmp_"+uid, "--remote-allow-origins=*", "--lang="+lang, "--accept-lang="+lang, "--disable-notifications", "--disable-infobars", "--no-default-browser-check"]
     
     if not chrome_running: 
         if verbose: print("Starting Chrome....")
         subprocess.Popen([chrome_path]+params, close_fds=True)
         if verbose: print("Started Chrome.... waiting...")
-        time.sleep(6)
+        time.sleep(4)
         if verbose: print("Starting Chrome.... done")
 
 @dataclass
@@ -338,8 +345,8 @@ class browserIF:
         print("Tabs: ", self.get_tabs())
         inp = input("Which tab shall I controll (None for [0]): ")
         print("hijacking tab....")
-        if inp == "": b.hijack_tab() 
-        else: b.hijack_tab(url=inp) 
+        if inp == "": self.hijack_tab() 
+        else: self.hijack_tab(url=inp) 
         print("-------------------------------------")
 
         while True: 
@@ -568,7 +575,7 @@ class browserIF:
 
 
 if __name__ == "__main__":
-    start_chrome_if_not_running()
+    start_chrome_if_not_running(lang="en_US")
 
-    b = browserIF()
-    b.manual_mode()
+    # b = browserIF()
+    # b.manual_mode()

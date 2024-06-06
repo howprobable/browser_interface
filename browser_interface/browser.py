@@ -266,7 +266,7 @@ class browserIF:
             raise WindowNotFound()
 
         return Rectangle.from_anchor(
-            anchor=Point(window.top, window.left),
+            anchor=Point(x=window.left, y=window.top),
             height=window.height,
             width=window.width,
         )

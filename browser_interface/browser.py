@@ -212,7 +212,7 @@ class browserIF:
             if self.verbose: print("[Browser] Tab already closed")
             return
         
-        if not self.tab.status == Tab.status_stopped: self.tab.stop() 
+        if self.tab.status == Tab.status_started: self.tab.stop() 
 
         try: 
             self.tab.wait(timeout=browserIF.tab_waiter)

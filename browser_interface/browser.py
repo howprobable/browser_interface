@@ -201,6 +201,10 @@ class browserIF:
         self.close_tab()
         time.sleep(.5) 
 
+        if len(chrome_windows) == 0: 
+            if self.verbose: print("[Browser] Chrome already closed")
+            return 
+        
         browser_window = pyautogui.getWindowsWithTitle("- Google Chrome")[0] 
         browser_window.close()
 

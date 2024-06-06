@@ -23,11 +23,18 @@ logging.getLogger('pychrome').setLevel(logging.CRITICAL)
 class LangNotFound(Exception): pass
 
 def start_chrome_if_not_running(verbose: bool = False, path: str = None, lang: str = "de"):
-    if lang not in ["de", "en_US"]: raise LangNotFound(lang)
+    langs = ["de", "en_US"]
+    if lang not in langs: raise LangNotFound(lang)
 
     chrome_running = any("chrome.exe" in p.name() for p in psutil.process_iter())
     chrome_path = path or "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
     uid = str(uuid.uuid4())
+
+    if not chrome_running: 
+        for folder in os.listdir("C:\\auto_chrome"):
+            if folder not in ["tmp_"+l for l in langs]: 
+                shutil.rmtree(os.path.join("C:\\auto_chrome", folder))
+
     shutil.copytree("C:\\auto_chrome\\tmp_"+lang, "C:\\auto_chrome\\tmp_"+uid)
     params = ["--remote-debugging-port=9222", "--user-data-dir=C:\\auto_chrome\\tmp_"+uid, "--remote-allow-origins=*", "--lang="+lang, "--accept-lang="+lang, "--disable-notifications", "--disable-infobars", "--no-default-browser-check"]
     

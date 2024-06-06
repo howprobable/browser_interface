@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from py_helpers import Point, Rectangle
 from pychrome import Tab, RuntimeException
 
+import requests
 import traceback
 import os
 import time
@@ -223,7 +224,10 @@ class browserIF:
         self.browser.close_tab(self.tab)
         if self.verbose: print(f"[Browser] Browser closed tab.... {self.tab}, hijacking other tab....")
         
-        self.hijack_tab()
+        try: 
+            self.hijack_tab()
+        except requests.exceptions.ConnectionError as _:
+            if self.verbose: print(f"[Browser] ConnectionError: No more tabs to hijack....")
 
     def get_viewport_content(self, withMetaInfo: bool = True) -> str: 
         elem_list : list[uiElement] = self._combine_all_elements(clickables=self._get_clickables(), texts=self._get_text_elements(), typeables=self._get_typeables())

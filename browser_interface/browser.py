@@ -182,7 +182,15 @@ class browserIF:
         tabs = self.browser.list_tab()
         return [self._get_url_of_tab(tab=t) for t in tabs]
 
-    def open_tab(self, url: str) -> None:
+    def open_tab(self, url: str, reuse_existing: bool = False) -> None:
+        if reuse_existing:
+            tabs = self.get_tabs()
+            for tab in tabs:
+                if url.lower() in tab.lower():
+                    if self.verbose: print(f"[Browser] Reusing existing tab for URL: {url}")
+                    self.hijack_tab(url=tab)
+                    return
+        
         if self.verbose: print(f"[Browser] Opening tab: {url}")
         if not (url.startswith("https://") or url.startswith("http://")): url = f"https://{url}" 
         self.tab = self.browser.new_tab()

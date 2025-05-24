@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from py_helpers import Point, Rectangle
 from pychrome import Tab, RuntimeException
 
+from typing import Optional
+
 import requests
 import traceback
 import os
@@ -189,6 +191,11 @@ class browserIF:
         self.tab.Page.navigate(url=url)
         self.tab.wait(timeout=browserIF.tab_waiter)
 
+    def get_page_dom(self) -> str:
+        if not self.tab: raise TabNotFound() 
+        if self.verbose: print("[Browser] Getting page DOM....")
+        return self._exec(cmd="document.documentElement.outerHTML", tab=self.tab)    
+
     def close_browser(self) -> None:
         if self.verbose: print("[Browser] Closing Chrome....")
         chrome_windows = pyautogui.getWindowsWithTitle("- Google Chrome")
@@ -209,7 +216,19 @@ class browserIF:
         chrome_windows[0].close()
         self.clean = True
 
-    def close_tab(self) -> None:
+
+    def close_tab(self, tab_name: Optional[str] = None) -> None:
+        """ 
+        Close the current tab or a specific tab by name.
+        If tab_name is provided, it will open and try to close that tab.
+
+        """
+        if tab_name:
+            self.open_tab(url=tab_name)
+        if not self.tab:
+            if self.verbose: print("[Browser] No tab to close")
+            return
+
         if self.verbose: print(f"[Browser] Closing tab.... {self.tab}")
 
         if not self.tab:
@@ -591,5 +610,19 @@ class browserIF:
 if __name__ == "__main__":
     start_chrome_if_not_running(lang="en_US")
 
-    # b = browserIF()
-    # b.manual_mode()
+    b = browserIF()
+
+    b.open_tab("https://www.google.com/search?q=1")
+
+
+    content = b.get_page_dom()
+
+
+
+
+    b.hijack_tab(url="sports.tipico")
+
+
+
+    open("test.html", "w", encoding="utf-8").write(content)
+    print("Saved content to test.html")

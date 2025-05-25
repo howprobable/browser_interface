@@ -127,6 +127,7 @@ class browserIF:
         debugging_url: str = "http://localhost:9222",
         start_and_close: bool = True,
         verbose: bool = False,
+        max_tabs: Optional[int] = None,
     ):
         self.clean: bool = False
         self.verbose: bool = verbose
@@ -138,6 +139,7 @@ class browserIF:
         self.start_and_close : bool = start_and_close
         self.browser = pychrome.Browser(url=debugging_url)
         self.tab: Tab = None
+        self.max_tabs: Optional[int] = max_tabs
         
         if start_and_close: 
             self.hijack_tab()
@@ -186,9 +188,15 @@ class browserIF:
         tabs = self.browser.list_tab()
         return [self._get_url_of_tab(tab=t) for t in tabs]
 
-    def open_tab(self, url: str, reuse_existing: bool = False) -> None:
-        if reuse_existing:
+    def open_tab(self, url: str, reuse_existing: bool = False, max_tabs: Optional[int] = None) -> None:
+        max_tabs = max_tabs or self.max_tabs
+        
+        if reuse_existing or max_tabs: 
             tabs = self.get_tabs()
+        else: 
+            tabs = []
+        
+        if reuse_existing:
             for tab in tabs:
                 if url.lower() in tab.lower():
                     if self.verbose: print(f"[Browser] Reusing existing tab for URL: {url}")
@@ -202,6 +210,10 @@ class browserIF:
         self.tab.wait(timeout=browserIF.tab_waiter)
         self.tab.Page.navigate(url=url)
         self.tab.wait(timeout=browserIF.tab_waiter)
+
+        if max_tabs and len(tabs) >= max_tabs:
+            if self.verbose: print(f"[Browser] Max tabs reached ({max_tabs}), all other tabs....")
+            self.close_all_other_tabs()
 
     def get_page_dom(self) -> str:
         if not self.tab: raise TabNotFound() 

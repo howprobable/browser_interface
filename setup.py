@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='browser_interface',
-    version='1.0.0',
+    version='2.0.0',
     packages=find_packages(),
     description='A python interface for a browser',
     long_description=open('README.md').read(),

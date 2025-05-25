@@ -175,7 +175,7 @@ class browserIF:
 
         for tab in tabs:
             if self.verbose: print(f"[Browser] Checking tab: {self._get_url_of_tab(tab=tab)}")
-            if url.lower() in self._get_url_of_tab(tab=tab):
+            if url.lower() in self._get_url_of_tab(tab=tab).lower():
                 self.tab = tab
                 if self.verbose: print(f"[Browser] Hijacked tab by URL: {self.tab}")
                 return

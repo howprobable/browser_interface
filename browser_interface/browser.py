@@ -174,6 +174,7 @@ class browserIF:
             return
 
         for tab in tabs:
+            if self.verbose: print(f"[Browser] Checking tab: {self._get_url_of_tab(tab=tab)}")
             if url.lower() in self._get_url_of_tab(tab=tab):
                 self.tab = tab
                 if self.verbose: print(f"[Browser] Hijacked tab by URL: {self.tab}")
@@ -466,7 +467,7 @@ class browserIF:
         return self._exec(cmd="document.location.href", tab=tab)
 
     def _exec(self, cmd: str, tab: Tab = None, noReturn: bool = False) -> Any:
-        print(f"[Browser] self.tab: {self.tab}, tab: {tab}")
+        if self.verbose: print(f"[Browser] self.tab: {self.tab}, tab: {tab}")
 
         if not tab:
             if not self.tab:

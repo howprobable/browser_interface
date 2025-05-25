@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='browser_interface',
-    version='2.1.3',
+    version='2.1.4',
     packages=find_packages(),
     description='A python interface for a browser',
     long_description=open('README.md').read(),
@@ -11,6 +11,7 @@ setup(
     author_email='eggertjannik@gmail.com',
     url='https://github.com/howprobable/py-helpers',
     install_requires=[
+        [line.strip() for line in open('requirements.txt').readlines() if line.strip() and not line.startswith('#')]
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

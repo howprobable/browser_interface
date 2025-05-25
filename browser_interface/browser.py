@@ -30,23 +30,26 @@ def start_chrome_if_not_running(verbose: bool = False, path: str = None, lang: s
     if lang not in langs: raise LangNotFound(lang)
 
     chrome_running = any("chrome.exe" in p.name() for p in psutil.process_iter())
+
+    if chrome_running: 
+        if verbose: print("Chrome is already running....")
+        return
+    
     chrome_path = path or "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
     uid = str(uuid.uuid4())
 
-    if not chrome_running: 
-        for folder in os.listdir("C:\\auto_chrome"):
-            if folder not in ["tmp_"+l for l in langs]: 
-                shutil.rmtree(os.path.join("C:\\auto_chrome", folder))
+    for folder in os.listdir("C:\\auto_chrome"):
+        if folder not in ["tmp_"+l for l in langs]: 
+            shutil.rmtree(os.path.join("C:\\auto_chrome", folder))
 
     shutil.copytree("C:\\auto_chrome\\tmp_"+lang, "C:\\auto_chrome\\tmp_"+uid)
     params = ["--remote-debugging-port=9222", "--user-data-dir=C:\\auto_chrome\\tmp_"+uid, "--remote-allow-origins=*", "--lang="+lang, "--accept-lang="+lang, "--disable-notifications", "--disable-infobars", "--no-default-browser-check"]
     
-    if not chrome_running: 
-        if verbose: print("Starting Chrome....")
-        subprocess.Popen([chrome_path]+params, close_fds=True)
-        if verbose: print("Started Chrome.... waiting...")
-        time.sleep(4)
-        if verbose: print("Starting Chrome.... done")
+    if verbose: print("Starting Chrome....")
+    subprocess.Popen([chrome_path]+params, close_fds=True)
+    if verbose: print("Started Chrome.... waiting...")
+    time.sleep(4)
+    if verbose: print("Starting Chrome.... done")
 
 @dataclass
 class uiElement:
@@ -202,7 +205,21 @@ class browserIF:
     def get_page_dom(self) -> str:
         if not self.tab: raise TabNotFound() 
         if self.verbose: print("[Browser] Getting page DOM....")
-        return self._exec(cmd="document.documentElement.outerHTML", tab=self.tab)    
+        return self._exec(cmd="document.documentElement.outerHTML", tab=self.tab)
+
+    def close_all_other_tabs(self) -> None:
+        if self.verbose: print("[Browser] Closing all other tabs....")
+        tabs = self.get_tabs()
+        if len(tabs) <= 1: 
+            if self.verbose: print("[Browser] No other tabs to close")
+            return
+        
+        for tab in tabs:
+            if tab != self.get_url():
+                self.hijack_tab(url=tab)
+                self.close_tab()
+        
+        if self.verbose: print("[Browser] Closed all other tabs")  
 
     def close_browser(self) -> None:
         if self.verbose: print("[Browser] Closing Chrome....")
@@ -616,12 +633,17 @@ class browserIF:
 
 
 if __name__ == "__main__":
-    start_chrome_if_not_running(lang="en_US")
+    start_chrome_if_not_running(lang="de", verbose=True)
+
+    exit() 
+
 
     b = browserIF()
 
     b.open_tab("https://www.google.com/search?q=1")
+    b.close_all_other_tabs()
 
+    exit()
 
     content = b.get_page_dom()
 

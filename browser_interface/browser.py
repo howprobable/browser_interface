@@ -634,26 +634,25 @@ class browserIF:
 
 
 if __name__ == "__main__":
-    start_chrome_if_not_running(lang="de", verbose=True)
+    browser = browserIF(verbose=True, start_and_close=False)
 
-    exit() 
+    URL = "https://sports.tipico.de/de/alle/1101/31201,30201,1201,32201/virtual_footballSerieA,4453301,44009301,virtual_footballBundesliga,virtual_footballPremierLeague,37301,2454610,virtual_footballBundesliga2,virtual_footballLaLiga"
+    browser.open_tab(URL, reuse_existing=True)
 
 
-    b = browserIF()
+    # b.open_tab("https://www.google.com/search?q=1")
+    # b.close_all_other_tabs()
 
-    b.open_tab("https://www.google.com/search?q=1")
-    b.close_all_other_tabs()
+    # exit()
 
-    exit()
-
-    content = b.get_page_dom()
-
+    # content = b.get_page_dom()
 
 
 
-    b.hijack_tab(url="sports.tipico")
+
+    # b.hijack_tab(url="sports.tipico")
 
 
 
-    open("test.html", "w", encoding="utf-8").write(content)
-    print("Saved content to test.html")
+    # open("test.html", "w", encoding="utf-8").write(content)
+    # print("Saved content to test.html")

@@ -219,6 +219,13 @@ class browserIF:
         if not self.tab: raise TabNotFound() 
         if self.verbose: print("[Browser] Getting page DOM....")
         return self._exec(cmd="document.documentElement.outerHTML", tab=self.tab)
+    
+    def reload(self) -> None:
+        if not self.tab: raise TabNotFound() 
+        if self.verbose: print("[Browser] Reloading tab....")
+        self.tab.Page.reload()
+        self.tab.wait(timeout=browserIF.tab_waiter)
+        if self.verbose: print("[Browser] Tab reloaded....")
 
     def close_all_other_tabs(self) -> None:
         if self.verbose: print("[Browser] Closing all other tabs....")
@@ -646,10 +653,23 @@ class browserIF:
 
 
 if __name__ == "__main__":
-    browser = browserIF(verbose=True, start_and_close=False)
+    browser = browserIF(verbose=True, start_and_close=True)
 
-    URL = "https://sports.tipico.de/de/alle/1101/31201,30201,1201,32201/virtual_footballSerieA,4453301,44009301,virtual_footballBundesliga,virtual_footballPremierLeague,37301,2454610,virtual_footballBundesliga2,virtual_footballLaLiga"
+    URL = "https://www.google.com/search?q=1"
     browser.open_tab(URL, reuse_existing=True)
+
+    time.sleep(2)
+
+    print(browser.get_page_dom()[:100]+"....")
+
+    time.sleep(2)
+
+    browser.reload()
+
+    time.sleep(2)
+    
+    print(browser.get_page_dom()[:100]+"....")
+
 
 
     # b.open_tab("https://www.google.com/search?q=1")

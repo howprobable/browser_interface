@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='browser_interface',
-    version='2.2.2',
+    version='2.2.3',
     packages=find_packages(),
     description='A python interface for a browser',
     long_description=open('README.md').read(),
@@ -10,9 +10,7 @@ setup(
     author='Jannik Eggert',
     author_email='eggertjannik@gmail.com',
     url='https://github.com/howprobable/browser_interface',
-    install_requires=[
-        [line.strip() for line in open('requirements.txt').readlines() if line.strip() and not line.startswith('#')]
-    ],
+    install_requires=[line.strip() for line in open('requirements.txt').readlines() if line.strip() and not line.startswith('#')],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

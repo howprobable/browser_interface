@@ -4,6 +4,7 @@ from typing import Any, Union
 from dataclasses import dataclass
 from py_helpers import Point, Rectangle
 from pychrome import Tab, RuntimeException
+from datetime import datetime
 
 from typing import Optional
 
@@ -128,6 +129,7 @@ class browserIF:
         start_and_close: bool = True,
         verbose: bool = False,
         max_tabs: Optional[int] = None,
+        handsoff: bool = False,
     ):
         self.clean: bool = False
         self.verbose: bool = verbose
@@ -142,7 +144,10 @@ class browserIF:
         self.max_tabs: Optional[int] = max_tabs
         
         if start_and_close: 
+            self.handsoff: bool = False 
             self.hijack_tab()
+
+        self.handsoff: bool = handsoff 
 
         self.clickable_buffer : list[uiElement] = None
         self.typeable_buffer : list[uiElement] = None
@@ -167,39 +172,50 @@ class browserIF:
             if self.verbose: print("[Browser] Already cleaned up....")
 
     def hijack_tab(self, url: str = None, nr: int = 0) -> None:
-        tabs = self.browser.list_tab()
+        if self.verbose: print(f"[Browser] [{datetime.now()}] Starting hijack tab")
+
+        tabs = self.browser.list_tab(use_cache=self.handsoff)
         if len(tabs) == 0: raise TabNotFound() 
 
         if not url:
             self.tab = tabs[nr]
-            if self.verbose: print(f"[Browser] Hijacked tab by NR: {self.tab}")
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Hijacked tab by NR: {self.tab}")
             return
-
+    
         for tab in tabs:
-            if self.verbose: print(f"[Browser] Checking tab: {self._get_url_of_tab(tab=tab)}")
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Checking tab: {self._get_url_of_tab(tab=tab)}")
             if url.lower() in self._get_url_of_tab(tab=tab).lower():
                 self.tab = tab
-                if self.verbose: print(f"[Browser] Hijacked tab by URL: {self.tab}")
+                if self.verbose: print(f"[Browser] [{datetime.now()}] Hijacked tab by URL: {self.tab}")
                 return
 
         raise TabNotFound()
 
     def get_tabs(self) -> list[str]:
-        tabs = self.browser.list_tab()
+        if self.verbose: print(f"[Browser] [{datetime.now()}] Starting get tabs")
+        if self.verbose: print(f"[Browser] [{datetime.now()}] list tabs from browser")
+        tabs = self.browser.list_tab(use_cache=self.handsoff)
+        if self.verbose: print(f"[Browser] [{datetime.now()}] Done listing tabs from browser")
+
         return [self._get_url_of_tab(tab=t) for t in tabs]
 
-    def open_tab(self, url: str, reuse_existing: bool = False, max_tabs: Optional[int] = None) -> None:
+    def open_tab(self, url: str, reuse_existing: bool = False, max_tabs: Optional[int] = None,) -> None:
         max_tabs = max_tabs or self.max_tabs
+        if self.verbose: print(f"[Browser] [{datetime.now()}] Starting open tab")
         
         if reuse_existing or max_tabs: 
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Gettings tabs")
+
             tabs = self.get_tabs()
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Done getting tabs")
+
         else: 
             tabs = []
         
         if reuse_existing:
             for tab in tabs:
                 if url.lower() in tab.lower():
-                    if self.verbose: print(f"[Browser] Reusing existing tab for URL: {url}")
+                    if self.verbose: print(f"[Browser] [{datetime.now()}] Reusing and hijacking existing tab for URL: {url}")
                     self.hijack_tab(url=tab)
                     return
         
@@ -260,7 +276,6 @@ class browserIF:
         
         chrome_windows[0].close()
         self.clean = True
-
 
     def close_tab(self, tab_name: Optional[str] = None) -> None:
         """ 
@@ -483,10 +498,11 @@ class browserIF:
     ### private
 
     def _get_url_of_tab(self, tab: Tab) -> str:
+        if self.verbose: print(f"[Browser] [{datetime.now()}] Getting URL of tab: {tab}")
         return self._exec(cmd="document.location.href", tab=tab)
 
     def _exec(self, cmd: str, tab: Tab = None, noReturn: bool = False) -> Any:
-        if self.verbose: print(f"[Browser] self.tab: {self.tab}, tab: {tab}")
+        if self.verbose: print(f"[Browser] [{datetime.now()}] self.tab: {self.tab}, tab: {tab}")
 
         if not tab:
             if not self.tab:
@@ -494,15 +510,22 @@ class browserIF:
             tab = self.tab
 
         if tab.status != tab.status_started: 
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Tab not started: {tab}")
             tab.start()
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Waiting for tab: {tab}")
             tab.wait(timeout=browserIF.tab_waiter)
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Done waiting for tab: {tab}")
 
         ret = ""
         try:
-            # print("Exec: ", f"JSON.stringify({cmd})")
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Evaluating exec {cmd}")
             ret = tab.Runtime.evaluate(expression=f"JSON.stringify({cmd})")
+            if self.verbose: print(f"[Browser] [{datetime.now()}] Done evaluating exec {cmd}.")
+
+
             if not noReturn:
                 ret = ret["result"]["value"]
+
                 return json.loads(ret)
             else: 
                 if ret["result"]["type"] == "undefined": return
@@ -529,7 +552,6 @@ class browserIF:
         
         self.typeable_buffer = [r.copy() for r in ret]
         return ret
-
 
     def _get_clickables(self ) -> list[uiElement]: 
         element_jsons = self._exec(cmd=self.get_file_contents_as_string(file_path=self.clickable_query_file))
@@ -653,38 +675,38 @@ class browserIF:
 
 
 if __name__ == "__main__":
-    browser = browserIF(verbose=True, start_and_close=True)
-
+    from datetime import datetime
+    
+    print("Starting browserIF test...")
+    browser = browserIF(verbose=True, start_and_close=True, handsoff=True)
     URL = "https://www.google.com/search?q=1"
+    URL2 = "https://www.google.com/search?q=2"
+    
+    print("Opening tab with URL: ", URL)
     browser.open_tab(URL, reuse_existing=True)
 
+    time.sleep(5)
+    print("Opening tab with URL: ", URL2)
+    browser.open_tab(URL2, reuse_existing=True)
+
+    print("Waiting for Browser to be ready....")
+    time.sleep(10)
+
+    print(f"[{datetime.now()}] Switching to URL1")
+
+    browser.open_tab(URL, reuse_existing=True)
+    print(f"[{datetime.now()}] Done switching to URL1")
+    print(f"[{datetime.now()}] Getting dom ")
+    dom_a = browser.get_page_dom()
+    print(f"[{datetime.now()}] Done getting dom, length: {len(dom_a)}")
+
+
     time.sleep(2)
 
-    print(browser.get_page_dom()[:100]+"....")
-
-    time.sleep(2)
-
-    browser.reload()
-
-    time.sleep(2)
-    
-    print(browser.get_page_dom()[:100]+"....")
-
-
-
-    # b.open_tab("https://www.google.com/search?q=1")
-    # b.close_all_other_tabs()
-
-    # exit()
-
-    # content = b.get_page_dom()
-
-
-
-
-    # b.hijack_tab(url="sports.tipico")
-
-
-
-    # open("test.html", "w", encoding="utf-8").write(content)
-    # print("Saved content to test.html")
+    print(f"[{datetime.now()}] Shutting down browser...")
+    browser.clean_up()
+    print(f"[{datetime.now()}] Browser shut down")
+    del browser 
+    print(f"[{datetime.now()}] BrowserIF test completed successfully")
+    time.sleep(5)
+    print("Exiting...")

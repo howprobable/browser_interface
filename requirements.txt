@@ -1,4 +1,4 @@
 py_helpers @ git+https://github.com/howprobable/py_helpers@1.0.0
 pyautogui
-pychrome
+pychrome @ git+https://github.com/howprobable/pychrome@0.2.5
 psutil
